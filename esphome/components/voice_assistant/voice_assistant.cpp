@@ -224,7 +224,7 @@ void VoiceAssistant::loop() {
         }
         ESP_LOGD(TAG, "VAD: min: %d max: %d", minsample, maxsample);
 
-        vad_state_t vad_state = VAD_SPEECH;
+        //vad_state_t vad_state = VAD_SPEECH;
         ESP_LOGD(TAG, "VAD detected speech");
         this->set_state_(State::START_PIPELINE, State::STREAMING_MICROPHONE);
 
