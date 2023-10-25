@@ -24,6 +24,8 @@
 #include <ringbuf.h>
 #endif
 
+#include <arduinoFFT.h>
+
 namespace esphome {
 namespace voice_assistant {
 
