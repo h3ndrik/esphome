@@ -200,6 +200,38 @@ void VoiceAssistant::loop() {
       }
       break;
     }
+#else
+    case State::WAIT_FOR_VAD: {
+      this->read_microphone_();
+      ESP_LOGD(TAG, "Waiting for speech...");
+      this->set_state_(State::WAITING_FOR_VAD);
+      break;
+    }
+    case State::WAITING_FOR_VAD: {
+      size_t bytes_read = this->read_microphone_();
+      if (bytes_read > 0) {
+
+        //float meanval = 0;
+        //for (int i=0; i<bytes_read; i++) {
+        //  meanval += samples[i];
+        //}
+        //meanval /= SAMPLES;
+        int16_t maxsample = -100000;
+        int16_t minsample = 100000;
+        for (int i=0; i<bytes_read; i++) {
+          minsample = min(minsample, this->input_buffer_[i]);
+          maxsample = max(maxsample, this->input_buffer_[i]);
+        }
+        ESP_LOGD(TAG, "VAD: min: %d max: %d", minsample, maxsample)
+
+        vad_state_t vad_state = VAD_SPEECH;
+        ESP_LOGD(TAG, "VAD detected speech");
+        this->set_state_(State::START_PIPELINE, State::STREAMING_MICROPHONE);
+
+        }
+      }
+      break;
+    }
 #endif
     case State::START_PIPELINE: {
       this->read_microphone_();
