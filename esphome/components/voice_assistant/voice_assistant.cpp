@@ -261,7 +261,7 @@ void VoiceAssistant::loop() {
         dsps_cplx2reC_sc16(x1, N_SAMPLES>>1);
         dsps_fft2r_deinit_sc16();
 
-        ESP_LOGE(TAG, "VAD: diff: %d rms: %d min: %d max: %d, num_samples: %d", maxsample-minsample, rms, minsample, maxsample, num_samples);
+        //ESP_LOGD(TAG, "VAD: diff: %d rms: %d min: %d max: %d, num_samples: %d", maxsample-minsample, rms, minsample, maxsample, num_samples);
 
         if (rms >= 2000) {
           //vad_state_t vad_state = VAD_SPEECH;
