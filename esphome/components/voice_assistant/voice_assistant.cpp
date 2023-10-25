@@ -228,8 +228,34 @@ void VoiceAssistant::loop() {
         }
         int32_t rms = sqrt(sum/num_samples);
 
-        //dsps_fft2r_sc16( this->input_buffer_, num_samples);
-        
+        // FFT with ESP-DSP
+        #define N_SAMPLES 256
+        __attribute__((aligned(16))) int16_t x1[N_SAMPLES];
+        __attribute__((aligned(16))) int16_t x2[N_SAMPLES];
+        __attribute__((aligned(16))) float wind[N_SAMPLES];
+
+
+        esp_err_t ret = dsps_fft2r_init_sc16(NULL, N_SAMPLES >> 1);
+        if (ret  != ESP_OK) {
+            ESP_LOGE(TAG, "Not possible to initialize FFT2R. Error = %i", ret);
+            return;
+        }
+        // Generate hann window
+        dsps_wind_hann_f32(wind, N_SAMPLES);
+
+        for (int i=0 ; i< num_samples ; i++)
+        {
+            x1[i] = this->input_buffer_[i] * wind[i];
+            x2[i] = this->input_buffer_[i];
+        }
+
+        // FFT Radix-2
+        dsps_fft2r_sc16_ae32( x1, N_SAMPLES>>1); // macro _ansi _aes3
+        // Bit reverse 
+        dsps_bit_rev2r_fc32(x1, N_SAMPLES>>1);
+        // Convert one complex vector with length N/2 to one real spectrum vector with length N/2
+        dsps_cplx2real_fc32(x1, N_SAMPLES>>1);
+        dsps_fft2r_deinit_sc16();
 
         ESP_LOGE(TAG, "VAD: diff: %d rms: %d min: %d max: %d, num_samples: %d", maxsample-minsample, rms, minsample, maxsample, num_samples);
 
