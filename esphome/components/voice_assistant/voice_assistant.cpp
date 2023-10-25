@@ -219,8 +219,8 @@ void VoiceAssistant::loop() {
         int16_t maxsample = std::numeric_limits<int16_t>::min();
         int16_t minsample = std::numeric_limits<int16_t>::max();
         for (int i=0; i<bytes_read; i++) {
-          minsample = std::min(minsample, this->input_buffer_[i]);
-          maxsample = std::max(maxsample, this->input_buffer_[i]);
+          minsample = std::min(minsample, this->input_buffer_[i]); // INT16_MIN
+          maxsample = std::max(maxsample, this->input_buffer_[i]); // INT16_MAX
         }
         ESP_LOGE(TAG, "VAD: min: %d max: %d", minsample, maxsample);
 
@@ -451,6 +451,10 @@ void VoiceAssistant::request_start(bool continuous, bool silence_detection) {
 #ifdef USE_ESP_ADF
     if (this->use_wake_word_) {
       rb_reset(this->ring_buffer_);
+      this->set_state_(State::START_MICROPHONE, State::WAIT_FOR_VAD);
+    } else
+#else
+    if (this->use_wake_word_) {
       this->set_state_(State::START_MICROPHONE, State::WAIT_FOR_VAD);
     } else
 #endif
