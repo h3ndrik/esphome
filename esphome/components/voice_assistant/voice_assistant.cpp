@@ -218,12 +218,11 @@ void VoiceAssistant::loop() {
         //meanval /= SAMPLES;
         int16_t maxsample = std::numeric_limits<int16_t>::min();
         int16_t minsample = std::numeric_limits<int16_t>::max();
-        for (int i=0; i<bytes_read; i++) { //  * sizeof(int16_t)
+        for (int i=0; i<bytes_read/sizeof(int16_t); i++) { //  
           minsample = std::min(minsample, this->input_buffer_[i]); // INT16_MIN
           maxsample = std::max(maxsample, this->input_buffer_[i]); // INT16_MAX
-          ESP_LOGE(TAG, "Sample[%d]: %d", i, this->input_buffer_[i]);
         }
-        ESP_LOGE(TAG, "VAD: min: %d max: %d, bytes_read: %d", minsample, maxsample, bytes_read);
+        ESP_LOGE(TAG, "VAD: diff: %d min: %d max: %d, bytes_read: %d", maxsample-minsample, minsample, maxsample, bytes_read);
 
         //vad_state_t vad_state = VAD_SPEECH;
         ESP_LOGD(TAG, "VAD detected speech");
