@@ -1,5 +1,6 @@
 import esphome.config_validation as cv
 import esphome.codegen as cg
+from esphome.const import CONF_ID, CONF_MODE
 from esphome.components import vu_meter, esp32
 
 CODEOWNERS = ["@h3ndrik"]
@@ -13,8 +14,8 @@ CONFIG_SCHEMA = cv.Schema({
 
 
 
-def to_code(config):
+async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
-    yield cg.register_component(var)
+    await cg.register_component(var, config)
 
     cg.add(var.set_my_required_key(config[CONF_DEVICE]))

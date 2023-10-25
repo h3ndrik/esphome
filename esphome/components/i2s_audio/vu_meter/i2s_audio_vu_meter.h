@@ -24,7 +24,7 @@ class I2SAudioVUMeter : public Component {
 
   void dump_config() override;
 
-
+  void set_my_required_key(std::string device) { this->device_ = device; }
  protected:
   std::string device_;
 
