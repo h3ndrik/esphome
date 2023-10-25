@@ -222,14 +222,13 @@ void VoiceAssistant::loop() {
           minsample = std::min(minsample, this->input_buffer_[i]);
           maxsample = std::max(maxsample, this->input_buffer_[i]);
         }
-        ESP_LOGD(TAG, "VAD: min: %d max: %d", minsample, maxsample)
+        ESP_LOGD(TAG, "VAD: min: %d max: %d", minsample, maxsample);
 
         vad_state_t vad_state = VAD_SPEECH;
         ESP_LOGD(TAG, "VAD detected speech");
         this->set_state_(State::START_PIPELINE, State::STREAMING_MICROPHONE);
 
         }
-      }
       break;
     }
 #endif
