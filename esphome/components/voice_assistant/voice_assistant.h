@@ -25,6 +25,7 @@
 #endif
 
 #include <arduinoFFT.h>
+#include "esp_dsp.h"
 
 namespace esphome {
 namespace voice_assistant {
