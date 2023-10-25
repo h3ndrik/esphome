@@ -229,7 +229,7 @@ void VoiceAssistant::loop() {
         int32_t rms = sqrt(sum/num_samples);
         ESP_LOGE(TAG, "VAD: diff: %d rms: %d min: %d max: %d, num_samples: %d", maxsample-minsample, rms, minsample, maxsample, num_samples);
 
-        if (maxsample-minsample >= 4500) {
+        if (rms >= 2000) {
           //vad_state_t vad_state = VAD_SPEECH;
           ESP_LOGD(TAG, "VAD detected speech");
           this->set_state_(State::START_PIPELINE, State::STREAMING_MICROPHONE);
