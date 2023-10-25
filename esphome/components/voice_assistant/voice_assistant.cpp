@@ -223,7 +223,7 @@ void VoiceAssistant::loop() {
           maxsample = std::max(maxsample, this->input_buffer_[i]); // INT16_MAX
           ESP_LOGE(TAG, "Sample[%d]: %d", i, this->input_buffer_[i]);
         }
-        ESP_LOGE(TAG, "VAD: min: %d max: %d, num_samples: %d", minsample, maxsample, num_samples);
+        ESP_LOGE(TAG, "VAD: min: %d max: %d, bytes_read: %d", minsample, maxsample, bytes_read);
 
         //vad_state_t vad_state = VAD_SPEECH;
         ESP_LOGD(TAG, "VAD detected speech");
