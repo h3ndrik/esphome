@@ -227,6 +227,10 @@ void VoiceAssistant::loop() {
           sum += ((int32_t) in * in);
         }
         int32_t rms = sqrt(sum/num_samples);
+
+        dsps_fft2r_sc16( this->input_buffer, num_samples);
+        
+
         ESP_LOGE(TAG, "VAD: diff: %d rms: %d min: %d max: %d, num_samples: %d", maxsample-minsample, rms, minsample, maxsample, num_samples);
 
         if (rms >= 2000) {

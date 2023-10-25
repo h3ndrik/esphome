@@ -24,7 +24,7 @@
 #include <ringbuf.h>
 #endif
 
-#include <arduinoFFT.h>
+//#include <arduinoFFT.h>
 #include "esp_dsp.h"
 
 namespace esphome {
