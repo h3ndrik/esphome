@@ -219,16 +219,17 @@ void VoiceAssistant::loop() {
         int16_t maxsample = std::numeric_limits<int16_t>::min();
         int16_t minsample = std::numeric_limits<int16_t>::max();
         int32_t sum = 0;
-        for (int i=0; i<bytes_read/sizeof(int16_t); i++) {
+        size_t num_samples = bytes_read/sizeof(int16_t);
+        for (int i=0; i<num_samples; i++) {
           int16_t in = this->input_buffer_[i];
           minsample = std::min(minsample, in); // INT16_MIN
           maxsample = std::max(maxsample, in); // INT16_MAX
           sum += ((int32_t) in * in);
         }
-        int32_t rms = sqrt(sum);
-        ESP_LOGE(TAG, "VAD: diff: %d rms: %d min: %d max: %d, bytes_read: %d", maxsample-minsample, rms, minsample, maxsample, bytes_read);
+        int32_t rms = sqrt(sum/num_samples);
+        ESP_LOGE(TAG, "VAD: diff: %d rms: %d min: %d max: %d, num_samples: %d", maxsample-minsample, rms, minsample, maxsample, num_samples);
 
-        if (maxsample-minsample >= 2500) {
+        if (maxsample-minsample >= 4500) {
           //vad_state_t vad_state = VAD_SPEECH;
           ESP_LOGD(TAG, "VAD detected speech");
           this->set_state_(State::START_PIPELINE, State::STREAMING_MICROPHONE);
