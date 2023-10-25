@@ -252,7 +252,7 @@ void VoiceAssistant::loop() {
         // FFT Radix-2
         dsps_fft2r_sc16_ae32( x1, N_SAMPLES>>1); // macro _ansi _aes3
         // Bit reverse 
-        dsps_bit_rev_sc16(x1, N_SAMPLES>>1);
+        dsps_bit_rev_sc16_ansi(x1, N_SAMPLES>>1);
         // Convert one complex vector with length N/2 to one real spectrum vector with length N/2
         dsps_cplx2reC_sc16(x1, N_SAMPLES>>1);
         dsps_fft2r_deinit_sc16();
