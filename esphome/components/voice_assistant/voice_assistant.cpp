@@ -216,11 +216,11 @@ void VoiceAssistant::loop() {
         //  meanval += samples[i];
         //}
         //meanval /= SAMPLES;
-        int16_t maxsample = -100000;
-        int16_t minsample = 100000;
+        int16_t maxsample = std::numeric_limits<int16_t>::min();
+        int16_t minsample = std::numeric_limits<int16_t>::max();
         for (int i=0; i<bytes_read; i++) {
-          minsample = min(minsample, this->input_buffer_[i]);
-          maxsample = max(maxsample, this->input_buffer_[i]);
+          minsample = std::min(minsample, this->input_buffer_[i]);
+          maxsample = std::max(maxsample, this->input_buffer_[i]);
         }
         ESP_LOGD(TAG, "VAD: min: %d max: %d", minsample, maxsample)
 
