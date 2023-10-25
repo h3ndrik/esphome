@@ -146,6 +146,10 @@ void VoiceAssistant::loop() {
           rb_reset(this->ring_buffer_);
           this->set_state_(State::START_MICROPHONE, State::WAIT_FOR_VAD);
         } else
+#else
+        if (this->use_wake_word_) {
+          this->set_state_(State::START_MICROPHONE, State::WAIT_FOR_VAD);
+        } else
 #endif
         {
           this->set_state_(State::START_PIPELINE, State::START_MICROPHONE);
