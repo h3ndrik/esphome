@@ -157,6 +157,8 @@ async def to_code(config):
 
     cg.add_define("USE_VOICE_ASSISTANT")
 
+    cg.add_library(None, None, "https://github.com/tensorflow/tflite-micro-arduino-examples.git",)
+
 
 VOICE_ASSISTANT_ACTION_SCHEMA = cv.Schema({cv.GenerateID(): cv.use_id(VoiceAssistant)})
 
