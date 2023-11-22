@@ -184,21 +184,51 @@ void VoiceAssistant::loop() {
         }
 #else
         size_t num_samples = bytes_read / sizeof(int16_t);
+        //uint64_t sum = 0;
         uint32_t sum = 0;
+        uint16_t max_sample = 0;
+        int num_high = 0;
         for (int i = 0; i < num_samples; i++) {
           int16_t in = this->input_buffer_[i];
-          sum += ((int32_t) in * in);
+          //sum += ((int32_t) in * in);
+          int16_t in_abs = abs(in);
+          sum += in_abs;
+          if (in_abs > max_sample) {
+            max_sample = in_abs;
+          }
+          if (in_abs > this->noise_floor_ + 500) {
+            num_high++;
+          }
         }
-        uint16_t rms = sqrt(sum / num_samples);
+        //uint16_t rms = sqrt(sum / num_samples);
+        uint16_t mean = sum / num_samples;
         if (this->noise_floor_ == 0) {
-          this->noise_floor_ = rms;  // initialize
+          //this->noise_floor_ = rms;  // initialize
+          this->noise_floor_ = mean;  // initialize
         }
 
-        float snr = 20.0 * log10f((float) rms / this->noise_floor_);
+        //float snr = 20.0 * log10f((float) rms / this->noise_floor_);
+        float snr = 20.0 * log10f((float) mean / this->noise_floor_);
         if (snr >= SNR_TRESHOLD_DB) {
           speech_detected = true;
+          ESP_LOGD("va", "SNR: %.2f", snr);
+          ESP_LOGD("va", "mean: %d", mean);
+          ESP_LOGD("va", "noise_floor: %d", this->noise_floor_);
+          ESP_LOGD("va", "max_sample: %d", max_sample);
+          ESP_LOGD("va", "num_high: %d", num_high);
         } else {
-          this->noise_floor_ = (((uint32_t) 15 * this->noise_floor_) + rms) / 16;
+          //this->noise_floor_ = (((uint32_t) 15 * this->noise_floor_) + rms) / 16;
+          this->noise_floor_ = (((uint32_t) 15 * this->noise_floor_) + mean) / 16;
+          static int num_loop;
+          if (num_loop > 1000) {
+            ESP_LOGD("va", "SNR: %.2f", snr);
+            ESP_LOGD("va", "mean: %d", mean);
+            ESP_LOGD("va", "noise_floor: %d", this->noise_floor_);
+            ESP_LOGD("va", "max_sample: %d", max_sample);
+            ESP_LOGD("va", "num_high: %d", num_high);
+            num_loop = 0;
+          }
+          num_loop++;
         }
 #endif
         if (speech_detected) {
