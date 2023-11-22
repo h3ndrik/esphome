@@ -167,14 +167,16 @@ class VoiceAssistant : public Component {
 
   uint8_t vad_threshold_{5};
   uint8_t vad_counter_{0};
+  uint32_t sample_count_{0};
 
 #ifdef USE_ESP_ADF
   vad_handle_t vad_instance_;
 #else
-  uint16_t noise_floor_{0};
+  float noise_floor_{0};
 #endif
 
   bool use_wake_word_;
+  bool settle_;
   uint8_t noise_suppression_level_;
   uint8_t auto_gain_;
   float volume_multiplier_;

@@ -21,7 +21,9 @@ static const size_t BUFFER_SIZE = 1000 * SAMPLE_RATE_HZ / 1000;       // 1s
 static const size_t SEND_BUFFER_SIZE = INPUT_BUFFER_SIZE * sizeof(int16_t);
 static const size_t RECEIVE_SIZE = 1024;
 static const size_t SPEAKER_BUFFER_SIZE = 16 * RECEIVE_SIZE;
-static const float SNR_TRESHOLD_DB = 10.0;
+static const float SNR_TRESHOLD_DB = 1.0;
+static const int32_t NO_VOICE_SAMPLES = 100;
+static const uint32_t SETTLE_SAMPLES = 30;
 
 float VoiceAssistant::get_setup_priority() const { return setup_priority::AFTER_CONNECTION; }
 
@@ -113,6 +115,7 @@ int VoiceAssistant::read_microphone_() {
       memset(this->input_buffer_, 0, INPUT_BUFFER_SIZE * sizeof(int16_t));
       return 0;
     }
+    // ESP_LOGD(TAG, "First word: %04X, Count: %d", (int16_t)this->input_buffer_[0], this->sample_count);
     // Write audio into ring buffer
     size_t available = xStreamBufferSpacesAvailable(this->stream_buffer_);
     if (available < bytes_read) {
@@ -170,6 +173,8 @@ void VoiceAssistant::loop() {
       this->read_microphone_();
       ESP_LOGD(TAG, "Waiting for speech...");
       this->set_state_(State::WAITING_FOR_VAD);
+      this->settle_ = true;
+      this->sample_count_ = 0;
       break;
     }
     case State::WAITING_FOR_VAD: {
@@ -184,58 +189,50 @@ void VoiceAssistant::loop() {
         }
 #else
         size_t num_samples = bytes_read / sizeof(int16_t);
-        uint64_t sum = 0;
-        //uint32_t sum = 0;
-        uint16_t max_sample = 0;
-        int num_high = 0;
+
+        uint32_t max = 0;
         for (int i = 0; i < num_samples; i++) {
           int16_t in = this->input_buffer_[i];
-          sum += ((int32_t) in * in);
-          int16_t in_abs = abs(in);
-          //sum += in_abs;
-          if (in_abs > max_sample) {
-            max_sample = in_abs;
-          }
-          if (in_abs > this->noise_floor_ + 500) {
-            num_high++;
-          }
+          float value = abs(this->volume_multiplier_ * in);
+          max = (value > max) ? value : max; 
         }
-        uint16_t rms = sqrt(sum / num_samples);
-        //uint16_t mean = sum / num_samples;
+        float sampledB = 20.0 * log10f(max);
+
         if (this->noise_floor_ == 0) {
-          this->noise_floor_ = rms;  // initialize
-          //this->noise_floor_ = mean;  // initialize
+          this->noise_floor_ = sampledB; // initialize
         }
 
-        float snr = 20.0 * log10f((float) rms / this->noise_floor_);
-        //float snr = 20.0 * log10f((float) mean / this->noise_floor_);
-        if (snr >= SNR_TRESHOLD_DB) {
+        float snr = sampledB - this->noise_floor_;
+
+        if (this->settle_ && this->sample_count_ > SETTLE_SAMPLES) {
+          this->settle_ = false;
+          // ESP_LOGD(TAG, "Sample=%0.2f, Background=%0.2f, SNR=%f, Counter=%d", sampledB, this->noise_floor_, snr, this->sample_count_);
+          ESP_LOGD(TAG, "Listening for wakeword...");
+        }
+        else if (this->settle_) {
+          // ESP_LOGD(TAG, "Sample=%0.2f, Background=%0.2f, SNR=%f, Counter=%d", sampledB, this->noise_floor_, snr, this->sample_count_);
+          this->sample_count_++;
+        }
+
+        if (!this->settle_ && snr >= SNR_TRESHOLD_DB) {
+          ESP_LOGD(TAG, "Sample=%0.2f, Background=%0.2f, SNR=%f, Counter=%d", sampledB, this->noise_floor_, snr, this->vad_counter_);
           speech_detected = true;
-          ESP_LOGD("va", "SNR: %.2f", snr);
-          ESP_LOGD("va", "rms: %d", rms);
-          //ESP_LOGD("va", "mean: %d", mean);
-          ESP_LOGD("va", "noise_floor: %d", this->noise_floor_);
-          ESP_LOGD("va", "max_sample: %d", max_sample);
-          ESP_LOGD("va", "num_high: %d", num_high);
         } else {
-          this->noise_floor_ = (((uint32_t) 15 * this->noise_floor_) + rms) / 16;
-          //this->noise_floor_ = (((uint32_t) 15 * this->noise_floor_) + mean) / 16;
-          static int num_loop;
-          if (num_loop > 1000) {
-            ESP_LOGD("va", "SNR: %.2f", snr);
-            ESP_LOGD("va", "rms: %d", rms);
-            //ESP_LOGD("va", "mean: %d", mean);
-            ESP_LOGD("va", "noise_floor: %d", this->noise_floor_);
-            ESP_LOGD("va", "max_sample: %d", max_sample);
-            ESP_LOGD("va", "num_high: %d", num_high);
-            num_loop = 0;
-          }
-          num_loop++;
+          this->noise_floor_ = ((15 * this->noise_floor_) + sampledB) / 16;
         }
 #endif
+        if (this->vad_counter_) {
+          this->sample_count_++;
+        }
+
         if (speech_detected) {
-          if (this->vad_counter_ < this->vad_threshold_) {
-            this->vad_counter_++;
+          if (!this->vad_counter_) {
+            ESP_LOGD(TAG, "Resetting counter: %d", this->vad_counter_);
+            this->sample_count_ = 0;
+          }
+
+          if (++this->vad_counter_ < this->vad_threshold_) {
+            ESP_LOGD(TAG, "Incrementing counter: %d", this->vad_counter_);
           } else {
             ESP_LOGD(TAG, "VAD detected speech");
             this->set_state_(State::START_PIPELINE, State::STREAMING_MICROPHONE);
@@ -244,7 +241,8 @@ void VoiceAssistant::loop() {
             this->vad_counter_ = 0;
           }
         } else {
-          if (this->vad_counter_ > 0) {
+          if (this->vad_counter_ > 0 && this->sample_count_ > NO_VOICE_SAMPLES) {
+            ESP_LOGD(TAG, "Decrementing counter: %d", this->vad_counter_);
             this->vad_counter_--;
           }
         }
