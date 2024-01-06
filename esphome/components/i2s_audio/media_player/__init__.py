@@ -80,7 +80,6 @@ CONFIG_SCHEMA = cv.All(
         },
         key=CONF_DAC_TYPE,
     ),
-    cv.only_with_arduino,
     validate_esp32_variant,
 )
 
@@ -104,5 +103,10 @@ async def to_code(config):
 
     cg.add_library("WiFiClientSecure", None)
     cg.add_library("HTTPClient", None)
-    cg.add_library("esphome/ESP32-audioI2S", "2.0.7")
+    #cg.add_library("esphome/ESP32-audioI2S", "2.0.7")
+    cg.add_library(
+            name = "ESP32-audioI2S",
+            repository="https://github.com/schreibfaul1/ESP32-audioI2S.git",
+            version="95d47436716dde89db6ef3eb3a2300dc8255c3ae"
+        )
     cg.add_build_flag("-DAUDIO_NO_SD_FS")
