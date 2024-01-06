@@ -115,7 +115,7 @@ async def to_code(config):
         esp32.add_idf_component(
             name="ESP32-audioI2S",
             repo="https://github.com/h3ndrik/ESP32-audioI2S",
-            ref="esphome_changes",
+            ref="idf",
             # path="components",
             # components=["esp-radar"],
         )
