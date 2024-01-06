@@ -1,6 +1,7 @@
 import esphome.codegen as cg
 from esphome.components import media_player, esp32
 import esphome.config_validation as cv
+from esphome.core import CORE
 
 from esphome import pins
 
@@ -103,10 +104,19 @@ async def to_code(config):
 
     cg.add_library("WiFiClientSecure", None)
     cg.add_library("HTTPClient", None)
-    #cg.add_library("esphome/ESP32-audioI2S", "2.0.7")
-    cg.add_library(
-            name = "ESP32-audioI2S",
-            repository="https://github.com/h3ndrik/ESP32-audioI2S.git",
-            version="96fd6d54538ff48a32aa2f9922e558a388c65711"
+    if CORE.using_arduino:
+        #cg.add_library("esphome/ESP32-audioI2S", "2.0.7")
+        cg.add_library(
+                name = "ESP32-audioI2S",
+                repository="https://github.com/h3ndrik/ESP32-audioI2S.git",
+                version="96fd6d54538ff48a32aa2f9922e558a388c65711"
+            )
+    if CORE.using_esp_idf:
+        esp32.add_idf_component(
+            name="ESP32-audioI2S",
+            repo="https://github.com/h3ndrik/ESP32-audioI2S",
+            ref="esphome_changes",
+            # path="components",
+            # components=["esp-radar"],
         )
     cg.add_build_flag("-DAUDIO_NO_SD_FS")
