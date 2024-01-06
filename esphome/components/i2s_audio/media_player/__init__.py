@@ -106,7 +106,7 @@ async def to_code(config):
     #cg.add_library("esphome/ESP32-audioI2S", "2.0.7")
     cg.add_library(
             name = "ESP32-audioI2S",
-            repository="https://github.com/schreibfaul1/ESP32-audioI2S.git",
-            version="95d47436716dde89db6ef3eb3a2300dc8255c3ae"
+            repository="https://github.com/h3ndrik/ESP32-audioI2S.git",
+            version="259f486c78684a54e9b020956d9d7b1434ae978d"
         )
     cg.add_build_flag("-DAUDIO_NO_SD_FS")
