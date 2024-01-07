@@ -17,7 +17,9 @@ void I2SAudioMediaPlayer::control(const media_player::MediaPlayerCall &call) {
       if (this->audio_->isRunning()) {
         this->audio_->stopSong();
       }
-      this->audio_->connecttohost(this->current_url_.value().c_str());
+      if (!this->audio_->connecttohost(this->current_url_.value().c_str())) {
+        ESP_LOGCONFIG(TAG, "connecttohost() failed");
+      }
     } else {
       this->start();
     }
@@ -162,7 +164,9 @@ void I2SAudioMediaPlayer::start_() {
   this->high_freq_.start();
   this->audio_->setVolume(remap<uint8_t, float>(this->volume, 0.0f, 1.0f, 0, 21));
   if (this->current_url_.has_value()) {
-    this->audio_->connecttohost(this->current_url_.value().c_str());
+    if (!this->audio_->connecttohost(this->current_url_.value().c_str())) {
+      ESP_LOGCONFIG(TAG, "connecttohost() failed");
+    }
     this->state = media_player::MEDIA_PLAYER_STATE_PLAYING;
     this->publish_state();
   }
