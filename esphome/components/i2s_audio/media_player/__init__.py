@@ -109,7 +109,7 @@ async def to_code(config):
         cg.add_library(
                 name = "ESP32-audioI2S",
                 repository="https://github.com/schreibfaul1/ESP32-audioI2S.git",
-                version="1638957953f797e9704b358b6a12bb6fc7baa4ca"
+                version="f2f1f5bcce74523dfc59e5844ba5878ed69c040a"
             )
     if CORE.using_esp_idf:
         esp32.add_idf_component(
