@@ -133,7 +133,7 @@ void I2SAudioMediaPlayer::play_() {
 
 void I2SAudioMediaPlayer::start() { this->i2s_state_ = I2S_STATE_STARTING; }
 void I2SAudioMediaPlayer::start_() {
-  if (!this->parent_->try_lock()) {
+  if (!this->parent_->try_lock_out()) {
     return;  // Waiting for another i2s to return lock
   }
 
@@ -185,7 +185,7 @@ void I2SAudioMediaPlayer::stop_() {
 
   this->audio_ = nullptr;
   this->current_url_ = {};
-  this->parent_->unlock();
+  this->parent_->unlock_out();
   this->i2s_state_ = I2S_STATE_STOPPED;
 
   this->high_freq_.stop();

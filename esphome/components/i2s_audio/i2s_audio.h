@@ -33,14 +33,19 @@ class I2SAudioComponent : public Component {
   void set_bclk_pin(int pin) { this->bclk_pin_ = pin; }
   void set_lrclk_pin(int pin) { this->lrclk_pin_ = pin; }
 
-  void lock() { this->lock_.lock(); }
-  bool try_lock() { return this->lock_.try_lock(); }
-  void unlock() { this->lock_.unlock(); }
+  void lock_out() { this->lock_out_.lock(); }
+  bool try_lock_out() { return this->lock_out_.try_lock(); }
+  void unlock_out() { this->lock_out_.unlock(); }
+
+  void lock_in() { this->lock_in_.lock(); }
+  bool try_lock_in() { return this->lock_in_.try_lock(); }
+  void unlock_in() { this->lock_in_.unlock(); }
 
   i2s_port_t get_port() const { return this->port_; }
 
  protected:
-  Mutex lock_;
+  Mutex lock_out_;
+  Mutex lock_in_;
 
   I2SAudioIn *audio_in_{nullptr};
   I2SAudioOut *audio_out_{nullptr};

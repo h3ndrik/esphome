@@ -42,7 +42,7 @@ void I2SAudioMicrophone::start() {
   this->state_ = microphone::STATE_STARTING;
 }
 void I2SAudioMicrophone::start_() {
-  if (!this->parent_->try_lock()) {
+  if (!this->parent_->try_lock_in()) {
     return;  // Waiting for another i2s to return lock
   }
   i2s_driver_config_t config = {
@@ -98,7 +98,7 @@ void I2SAudioMicrophone::stop() {
 void I2SAudioMicrophone::stop_() {
   i2s_stop(this->parent_->get_port());
   i2s_driver_uninstall(this->parent_->get_port());
-  this->parent_->unlock();
+  this->parent_->unlock_in();
   this->state_ = microphone::STATE_STOPPED;
   this->high_freq_.stop();
 }
