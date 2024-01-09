@@ -119,4 +119,4 @@ async def to_code(config):
             # path="components",
             # components=["esp-radar"],
         )
-#    cg.add_build_flag("-DAUDIO_NO_SD_FS")
+    cg.add_build_flag("-DAUDIO_NO_SD_FS")
