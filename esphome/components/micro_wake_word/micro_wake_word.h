@@ -1,7 +1,5 @@
 #pragma once
 
-#ifdef USE_ESP_IDF
-
 #include "preprocessor_settings.h"
 #include "streaming_model.h"
 
@@ -172,5 +170,3 @@ template<typename... Ts> class IsRunningCondition : public Condition<Ts...>, pub
 
 }  // namespace micro_wake_word
 }  // namespace esphome
-
-#endif  // USE_ESP_IDF
