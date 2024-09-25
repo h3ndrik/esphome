@@ -1,5 +1,3 @@
-#ifdef USE_ESP_IDF
-
 #include "streaming_model.h"
 
 #include "esphome/core/hal.h"
@@ -187,5 +185,3 @@ bool VADModel::determine_detected() {
 
 }  // namespace micro_wake_word
 }  // namespace esphome
-
-#endif
