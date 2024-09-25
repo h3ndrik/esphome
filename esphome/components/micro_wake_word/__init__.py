@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from urllib.parse import urljoin
 
+from esphome import CORE
 from esphome import automation, external_files, git
 from esphome.automation import register_action, register_condition
 import esphome.codegen as cg
@@ -413,18 +414,25 @@ async def to_code(config):
     mic = await cg.get_variable(config[CONF_MICROPHONE])
     cg.add(var.set_microphone(mic))
 
-    esp32.add_idf_component(
-        name="esp-tflite-micro",
-        repo="https://github.com/espressif/esp-tflite-micro",
-        ref="v1.3.1",
-    )
-    # add esp-nn dependency for tflite-micro to work around https://github.com/espressif/esp-nn/issues/17
-    # ...remove after switching to IDF 5.1.4+
-    esp32.add_idf_component(
-        name="esp-nn",
-        repo="https://github.com/espressif/esp-nn",
-        ref="v1.1.0",
-    )
+    if CORE.using_esp_idf:
+        esp32.add_idf_component(
+            name="esp-tflite-micro",
+            repo="https://github.com/espressif/esp-tflite-micro",
+            ref="v1.3.1",
+        )
+        # add esp-nn dependency for tflite-micro to work around https://github.com/espressif/esp-nn/issues/17
+        # ...remove after switching to IDF 5.1.4+
+        esp32.add_idf_component(
+            name="esp-nn",
+            repo="https://github.com/espressif/esp-nn",
+            ref="v1.1.0",
+        )
+    if CORE.using_arduino:
+        cg.add_library(
+            name = "ESP_TF",
+            repository="https://github.com/h3ndrik/ESP_TF.git",
+            version="a41894f4b5a2c2d3e2268d875437592294594390"
+        )
 
     cg.add_build_flag("-DTF_LITE_STATIC_MEMORY")
     cg.add_build_flag("-DTF_LITE_DISABLE_X86_NEON")
