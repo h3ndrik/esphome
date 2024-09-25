@@ -1,7 +1,5 @@
 #pragma once
 
-#ifdef USE_ESP_IDF
-
 #include "preprocessor_settings.h"
 
 #include <tensorflow/lite/core/c/common.h>
@@ -80,5 +78,3 @@ class VADModel final : public StreamingModel {
 
 }  // namespace micro_wake_word
 }  // namespace esphome
-
-#endif
