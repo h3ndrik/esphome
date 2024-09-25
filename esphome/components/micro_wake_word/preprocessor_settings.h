@@ -1,7 +1,5 @@
 #pragma once
 
-#ifdef USE_ESP_IDF
-
 #include <cstdint>
 
 namespace esphome {
@@ -16,5 +14,3 @@ static const uint16_t AUDIO_SAMPLE_FREQUENCY = 16000;
 
 }  // namespace micro_wake_word
 }  // namespace esphome
-
-#endif
