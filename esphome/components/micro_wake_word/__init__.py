@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 from urllib.parse import urljoin
 
-from esphome import CORE
+from esphome.core import CORE
 from esphome import automation, external_files, git
 from esphome.automation import register_action, register_condition
 import esphome.codegen as cg
