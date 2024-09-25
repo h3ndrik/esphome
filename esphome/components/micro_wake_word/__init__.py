@@ -347,7 +347,6 @@ CONFIG_SCHEMA = cv.All(
             ),
         }
     ).extend(cv.COMPONENT_SCHEMA),
-    cv.only_with_esp_idf,
 )
 
 
