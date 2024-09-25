@@ -437,6 +437,7 @@ async def to_code(config):
     cg.add_build_flag("-DTF_LITE_STATIC_MEMORY")
     cg.add_build_flag("-DTF_LITE_DISABLE_X86_NEON")
     cg.add_build_flag("-DESP_NN")
+    cg.add_build_flag("-DCONFIG_IDF_TARGET_ESP32")
 
     if on_wake_word_detection_config := config.get(CONF_ON_WAKE_WORD_DETECTED):
         await automation.build_automation(
