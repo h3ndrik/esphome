@@ -430,8 +430,8 @@ async def to_code(config):
     if CORE.using_arduino:
         cg.add_library(
             name = "ESP_TF",
-            repository="https://github.com/h3ndrik/ESP_TF.git",
-            version="a41894f4b5a2c2d3e2268d875437592294594390"
+            repository="https://github.com/Nickjgniklu/ESP_TF.git",
+            version="739ded5649b49a49951993bf35cae1c8028ece0e"
         )
 
     cg.add_build_flag("-DTF_LITE_STATIC_MEMORY")
