@@ -179,7 +179,7 @@ size_t I2SAudioMicrophone::read(int16_t *buf, size_t len) {
     case I2S_BITS_PER_SAMPLE_32BIT: {
       size_t samples_read = bytes_read / sizeof(int32_t);
       for (size_t i = 0; i < samples_read; i++) {
-        int32_t temp = reinterpret_cast<int32_t *>(buf)[i] >> 14;
+        int32_t temp = reinterpret_cast<int32_t *>(buf)[i] >> 11;
         buf[i] = clamp<int16_t>(temp, INT16_MIN, INT16_MAX);
       }
       return samples_read * sizeof(int16_t);
