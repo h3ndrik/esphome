@@ -73,6 +73,7 @@ bool SendspinWsServer::start(SendspinHub *hub, bool task_stack_in_psram, unsigne
   config.global_user_ctx = (void *) this;
   config.global_user_ctx_free_fn = nullptr;
   config.ctrl_port = ESP_HTTPD_DEF_CTRL_PORT + 1;  // Avoid conflict with web_server component
+  config.stack_size = 8192;
 
   // Start the HTTP server
   ESP_LOGI(TAG, "Starting server on port: %d (max connections: %d)", config.server_port, this->max_connections_);
