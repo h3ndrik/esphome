@@ -7,6 +7,8 @@
 
 #include <freertos/task.h>
 
+extern "C" { esp_err_t camera_enable_out_clock(camera_config_t *config); void camera_disable_out_clock(); }
+
 namespace esphome::esp32_camera {
 
 static const char *const TAG = "esp32_camera";
@@ -226,6 +228,11 @@ void ESP32Camera::loop() {
   if (now - this->last_update_ <= this->max_update_interval_)
     return;
 
+  if (!this->clock_enabled_) {
+    camera_enable_out_clock(&this->config_);
+    this->clock_enabled_ = true;
+  }
+
   // request new image
   camera_fb_t *fb;
   if (xQueueReceive(this->framebuffer_get_queue_, &fb, 0L) != pdTRUE) {
@@ -292,6 +299,11 @@ void ESP32Camera::loop() {
   }
   this->last_update_ = now;
   this->single_requesters_ = 0;
+
+  if (this->clock_enabled_) {
+    camera_disable_out_clock();
+    this->clock_enabled_ = false;
+  }
 }
 
 /* ---------------- constructors ---------------- */
