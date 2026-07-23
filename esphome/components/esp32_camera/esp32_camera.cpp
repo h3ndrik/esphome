@@ -228,10 +228,10 @@ void ESP32Camera::loop() {
   if (now - this->last_update_ <= this->max_update_interval_)
     return;
 
-  if (!this->clock_enabled_) {
-    camera_enable_out_clock(&this->config_);
-    this->clock_enabled_ = true;
-  }
+//  if (!this->clock_enabled_) {
+//    camera_enable_out_clock(&this->config_);
+//    this->clock_enabled_ = true;
+//  }
 
   // request new image
   camera_fb_t *fb;
@@ -300,10 +300,10 @@ void ESP32Camera::loop() {
   this->last_update_ = now;
   this->single_requesters_ = 0;
 
-  if (this->clock_enabled_) {
-    camera_disable_out_clock();
-    this->clock_enabled_ = false;
-  }
+//  if (this->clock_enabled_) {
+//    camera_disable_out_clock();
+//    this->clock_enabled_ = false;
+//  }
 }
 
 /* ---------------- constructors ---------------- */
@@ -528,7 +528,17 @@ bool ESP32Camera::has_requested_image_() const { return this->single_requesters_
 bool ESP32Camera::can_return_image_() const { return this->current_image_.use_count() == 1; }
 void ESP32Camera::framebuffer_task(void *pv) {
   ESP32Camera *that = (ESP32Camera *) pv;
+  bool clock_enabled = true;
   while (true) {
+
+    if (!clock_enabled) {
+      ESP_LOGE(TAG, "enable camera clock");
+      camera_enable_out_clock(&that->config_);
+      clock_enabled = true;
+      camera_fb_t *fb = esp_camera_fb_get();
+      esp_camera_fb_return(fb);
+    }
+
     camera_fb_t *framebuffer = esp_camera_fb_get();
     xQueueSend(that->framebuffer_get_queue_, &framebuffer, portMAX_DELAY);
     // Only wake the main loop if there's a pending request to consume the frame
@@ -538,6 +548,13 @@ void ESP32Camera::framebuffer_task(void *pv) {
     // return is no-op for config with 1 fb
     xQueueReceive(that->framebuffer_return_queue_, &framebuffer, portMAX_DELAY);
     esp_camera_fb_return(framebuffer);
+
+    if (clock_enabled && !that->has_requested_image_()) {
+      ESP_LOGE(TAG, "disable camera clock");
+      camera_disable_out_clock();
+      clock_enabled = false;
+    }
+
   }
 }
 

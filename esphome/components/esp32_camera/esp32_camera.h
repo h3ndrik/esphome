@@ -223,7 +223,7 @@ class ESP32Camera final : public camera::Camera {
   QueueHandle_t framebuffer_return_queue_;
   std::vector<camera::CameraListener *> listeners_;
 
-  bool clock_enabled_{true};
+  //bool clock_enabled_{true};
 
   uint32_t last_idle_request_{0};
   uint32_t last_update_{0};
